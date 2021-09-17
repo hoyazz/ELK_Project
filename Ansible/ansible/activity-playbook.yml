@@ -1,0 +1,32 @@
+---
+- name: Activity playbook
+  hosts: webservers
+  become: true
+  tasks:
+
+          - name: Install docker.io python3-pip
+            apt:
+                    name: docker.io, python3-pip
+                    state: present
+
+          - name: apache2 remove
+            apt:
+                    name: apache2
+                    state: absent
+
+          - name: Install docker
+            pip:
+                    name: docker
+
+          - name: create dvwa
+            docker_container:
+                    name: dvwa
+                    image: cyberxsecurity/dvwa
+                    state: started
+                    restart_policy: always
+                    published_ports: 80:80
+
+          - name: start docker after reboot
+            systemd:
+                    name: docker
+                    enabled: yes

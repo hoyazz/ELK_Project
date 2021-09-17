@@ -1,0 +1,39 @@
+---
+- name: Activity playbook
+  hosts: elk 
+  become: true
+  tasks:
+
+          - name: Install docker.io python3-pip
+            apt:
+                    update_cache: yes
+                    name: docker.io, python3-pip
+                    state: present
+
+          - name: Install docker
+            pip:
+                    name: docker
+
+          - name: increase virtual memory
+            sysctl:
+                    name: vm.max_map_count
+                    value: 262144
+                    sysctl_set: yes
+                    state: present
+                    reload: yes
+
+          - name: download elk docker
+            docker_container:
+                    name: elk
+                    image: sebp/elk:761
+                    state: started
+                    restart_policy: always
+                    published_ports: 
+                    - 5601:5601 
+                    - 9200:9200 
+                    - 5044:5044
+
+          - name: start docker and restart after boot
+            systemd:
+                    name: docker
+                    enabled: yes
